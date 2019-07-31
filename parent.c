@@ -10,7 +10,9 @@
 #include <netdb.h>
 #include <stdbool.h>
 #include <time.h>
+#include <ctype.h>
 
+#define END_MSG_CHAR '9'
 #define MSG_CHAR '1'
 
 void splash(void);
@@ -62,12 +64,16 @@ int main(int argc, char *argv[])
 
   while ( true ) {
     splash();
-    hand = select_hand();
-    if ( hand == '9' ) { break; }
-    
-    r_flag = true;
-    w_flag = false;
 
+    hand = select_hand();
+
+    if ( hand == NULL ) { continue; }
+    if ( hand == '9' ) {
+      sch = END_MSG_CHAR;
+      write(sockfd, &sch, sizeof(char));
+      break;
+    }
+    
     sch = MSG_CHAR;
   
     write(sockfd, &sch, sizeof(char));
@@ -88,7 +94,9 @@ int main(int argc, char *argv[])
 
 void splash(void)
 {
-  printf("*** Janken Game ***\n\n");
+  printf("\n*******************\n");
+  printf("*** Janken Game ***\n");
+  printf("*******************\n\n");
 
   return;
 }
@@ -105,7 +113,12 @@ char select_hand(void)
   
   printf("Select your hand[Stone=0, Scissors=1, Paper=2, END=9]\n: ");
   scanf("%c", &hand);
+  (void)getchar(); 
 
+  if ( hand != '0' && hand != '1' && hand != '2' && hand != '9') {
+    return NULL;
+  }
+  
   return hand;
 }
 
